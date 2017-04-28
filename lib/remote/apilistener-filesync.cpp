@@ -99,15 +99,16 @@ bool ApiListener::UpdateConfigDir(const ConfigDirInformation& oldConfigInfo, con
 
 	/* skip update if our config is newer */
 	if (oldTimestamp >= newTimestamp) {
+		/* TODO: Less ugly */
 		Log(LogInformation, "ApiListener")
-		    << "Old timestamp '" << oldTimestamp.ToString() << "' is more recent than new one '"
-		    << newTimestamp.ToString() << "'.";
+		    << "Old timestamp '" << std::setprecision (std::numeric_limits<double>::digits10 + 1) 
+		    << "' is more recent than new one '"  << newTimestamp << "'.";
 		return false;
 	}
 
 	Log(LogInformation, "ApiListener")
-	    << "New timestamp '" << newTimestamp.ToString() << "' is more recent than old one '"
-	    << oldTimestamp.ToString() << "'.";
+	    << "New timestamp '" << std::setprecision (std::numeric_limits<double>::digits10 + 1) <<  newTimestamp
+	    << "' is more recent than old one '" << oldTimestamp << "'.";
 
 	{
 		ObjectLock olock(newConfig);
@@ -274,9 +275,10 @@ Value ApiListener::ConfigUpdateHandler(const MessageOrigin::Ptr& origin, const D
 		return Empty;
 	}
 
+	/* TODO: These are just pointers atm. convert to string */
 	Log(LogInformation, "ApiListener")
 	    << "Applying config update from endpoint '" << origin->FromClient->GetEndpoint() << "' of zone  '"
-	    << origin->FromZone() << '"';
+	    << origin->FromZone << '"';
 
 	Dictionary::Ptr updateV1 = params->Get("update");
 	Dictionary::Ptr updateV2 = params->Get("update_v2");
