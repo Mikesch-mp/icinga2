@@ -51,6 +51,7 @@ REGISTER_TYPE(Application);
 boost::signals2::signal<void (void)> Application::OnReopenLogs;
 Application::Ptr Application::m_Instance = NULL;
 bool Application::m_ShuttingDown = false;
+bool Application::m_Ready = false;
 bool Application::m_RequestRestart = false;
 bool Application::m_RequestReopenLogs = false;
 pid_t Application::m_ReloadProcess = 0;
@@ -280,6 +281,12 @@ void Application::RunEventLoop(void)
 
 	double lastLoop = Utility::GetTime();
 
+	/* signal for features (notification, checker) that main loop is ready */
+	m_Ready = true;
+	//TODO: remove
+	Log(LogCritical, "Application")
+	    << "RunEventLoop() started.";
+
 mainloop:
 	while (!m_ShuttingDown && !m_RequestRestart) {
 		/* Watches for changes to the system time. Adjusts timers if necessary. */
@@ -336,6 +343,11 @@ bool Application::IsShuttingDown(void)
 void Application::OnShutdown(void)
 {
 	/* Nothing to do here. */
+}
+
+bool Application::IsReady(void)
+{
+	return m_Ready;
 }
 
 static void ReloadProcessCallbackInternal(const ProcessResult& pr)

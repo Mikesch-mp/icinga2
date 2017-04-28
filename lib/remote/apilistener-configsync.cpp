@@ -339,7 +339,7 @@ void ApiListener::UpdateConfigObject(const ConfigObject::Ptr& object, const Mess
 
 #ifdef I2_DEBUG
 	Log(LogDebug, "ApiListener")
-	    << "Sent update for object '" << object->GetName() << "': " << JsonEncode(params);
+	    << "Sending update for object '" << object->GetName() << "': " << JsonEncode(params);
 #endif /* I2_DEBUG */
 
 	if (client)

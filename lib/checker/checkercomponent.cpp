@@ -137,6 +137,25 @@ void CheckerComponent::CheckThreadProc(void)
 
 		Checkable::Ptr checkable = csi.Object;
 
+		IcingaApplication::Ptr instance = IcingaApplication::GetInstance();
+
+		if (!instance->IsReady()) {
+//#ifdef I2_DEBUG /* I2_DEBUG */
+//			Log(LogDebug, "CheckerComponent")
+//			    << "Skipping checks, application '" << instance->GetName() << "' is not yet ready.";
+//#endif /* I2_DEBUG */
+			/* TODO: Don't execute the check when the application is warming up.
+			 * Attempt to do it at some later grace period.
+			 */
+			lock.unlock();
+
+			checkable->SetNextCheck(Utility::GetTime() + 10.0);
+
+			lock.lock();
+
+			continue;
+		}
+
 		m_IdleCheckables.erase(checkable);
 
 		bool forced = checkable->GetForceNextCheck();
@@ -153,12 +172,12 @@ void CheckerComponent::CheckThreadProc(void)
 			Service::Ptr service;
 			tie(host, service) = GetHostService(checkable);
 
-			if (host && !service && (!checkable->GetEnableActiveChecks() || !IcingaApplication::GetInstance()->GetEnableHostChecks())) {
+			if (host && !service && (!checkable->GetEnableActiveChecks() || !instance->GetEnableHostChecks())) {
 				Log(LogNotice, "CheckerComponent")
 				    << "Skipping check for host '" << host->GetName() << "': active host checks are disabled";
 				check = false;
 			}
-			if (host && service && (!checkable->GetEnableActiveChecks() || !IcingaApplication::GetInstance()->GetEnableServiceChecks())) {
+			if (host && service && (!checkable->GetEnableActiveChecks() || !instance->GetEnableServiceChecks())) {
 				Log(LogNotice, "CheckerComponent")
 				    << "Skipping check for service '" << service->GetName() << "': active service checks are disabled";
 				check = false;

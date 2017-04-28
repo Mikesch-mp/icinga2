@@ -74,6 +74,7 @@ public:
 	static void RequestReopenLogs(void);
 
 	static bool IsShuttingDown(void);
+	static bool IsReady(void);
 
 	static void SetDebuggingSeverity(LogSeverity severity);
 	static LogSeverity GetDebuggingSeverity(void);
@@ -165,10 +166,12 @@ private:
 
 	static bool m_ShuttingDown; /**< Whether the application is in the process of
 				  shutting down. */
+	static bool m_Ready; /**> Whether the application is ready on RunEventLoop() */
 	static bool m_RequestRestart; /**< A restart was requested through SIGHUP */
 	static pid_t m_ReloadProcess; /**< The PID of a subprocess doing a reload, 
 									only valid when l_Restarting==true */
 	static bool m_RequestReopenLogs; /**< Whether we should re-open log files. */
+
 
 	static int m_ArgC; /**< The number of command-line arguments. */
 	static char **m_ArgV; /**< Command-line arguments. */

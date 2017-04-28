@@ -263,6 +263,27 @@ String Notification::NotificationTypeToString(NotificationType type)
 
 void Notification::BeginExecuteNotification(NotificationType type, const CheckResult::Ptr& cr, bool force, bool reminder, const String& author, const String& text)
 {
+	double now = Utility::GetTime();
+
+	IcingaApplication::Ptr instance = IcingaApplication::GetInstance();
+
+	if (!instance->IsReady()) {
+		/* TODO: Reschedule the notification event and let it be picked up
+		 * by the NotificationComponent timer.
+		 */
+		double delayedNotification = now + 5.0;
+		if (GetNextNotification() > delayedNotification)
+			SetNextNotification(delayedNotification);
+
+#ifdef I2_DEBUG /* I2_DEBUG */
+		Log(LogWarning, "NotificationComponent")
+		    << "Skipping notification '" << GetName() << "', application '" << instance->GetName()
+		    << "' is not yet ready. Adjusting time to " << Utility::FormatDateTime("%Y-%m-%d %H:%M:%S %z", delayedNotification);
+#endif /* I2_DEBUG */
+
+		return;
+	}
+
 	Log(LogNotice, "Notification")
 	    << "Attempting to send " << (reminder ? "reminder " : " ") << "notifications for notification object '" << GetName() << "'.";
 
@@ -278,7 +299,6 @@ void Notification::BeginExecuteNotification(NotificationType type, const CheckRe
 			return;
 		}
 
-		double now = Utility::GetTime();
 		Dictionary::Ptr times = GetTimes();
 
 		if (times && type == NotificationProblem) {

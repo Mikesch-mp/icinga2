@@ -79,6 +79,23 @@ void NotificationComponent::Stop(bool runtimeRemoved)
  */
 void NotificationComponent::NotificationTimerHandler(void)
 {
+	IcingaApplication::Ptr instance = IcingaApplication::GetInstance();
+
+	/* TODO: This is somewhat redundant since we need to check
+	 * this in BeginExecuteNotification() too. Here we don't reschedule
+	 * the notification, just abort the timer handler for re-notifications.
+	 */
+	if (!instance->IsReady()) {
+#ifdef I2_DEBUG /* I2_DEBUG */
+		Log(LogWarning, "NotificationComponent")
+		    << "Skipping notifications, application '" << instance->GetName() << "' is not yet ready.";
+#endif /* I2_DEBUG */
+		return;
+	} else {
+		Log(LogCritical, "NotificationComponent")
+		    << "Renotifications ready to fire.";
+	}
+
 	double now = Utility::GetTime();
 
 	for (const Notification::Ptr& notification : ConfigType::GetObjectsByType<Notification>()) {
