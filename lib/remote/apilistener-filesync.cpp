@@ -36,7 +36,7 @@ void ApiListener::ConfigGlobHandler(ConfigDirInformation& config, const String& 
 	CONTEXT("Creating config update for file '" + file + "'");
 
 	Log(LogNotice, "ApiListener")
-	    << "Creating config update for file '" << file << "'";
+	    << "Creating config update for file '" << file << "'.";
 
 	std::ifstream fp(file.CStr(), std::ifstream::binary);
 	if (!fp)
@@ -98,8 +98,16 @@ bool ApiListener::UpdateConfigDir(const ConfigDirInformation& oldConfigInfo, con
 		newTimestamp = newConfig->Get("/.timestamp");
 
 	/* skip update if our config is newer */
-	if (oldTimestamp >= newTimestamp)
+	if (oldTimestamp >= newTimestamp) {
+		Log(LogInformation, "ApiListener")
+		    << "Old timestamp '" << oldTimestamp.ToString() << "' is more recent than new one '"
+		    << newTimestamp.ToString() << "'.";
 		return false;
+	}
+
+	Log(LogInformation, "ApiListener")
+	    << "New timestamp '" << newTimestamp.ToString() << "' is more recent than old one '"
+	    << oldTimestamp.ToString() << "'.";
 
 	{
 		ObjectLock olock(newConfig);
@@ -265,6 +273,10 @@ Value ApiListener::ConfigUpdateHandler(const MessageOrigin::Ptr& origin, const D
 		    << "Ignoring config update. '" << listener->GetName() << "' does not accept config.";
 		return Empty;
 	}
+
+	Log(LogInformation, "ApiListener")
+	    << "Applying config update from endpoint '" << origin->FromClient->GetEndpoint() << "' of zone  '"
+	    << origin->FromZone() << '"';
 
 	Dictionary::Ptr updateV1 = params->Get("update");
 	Dictionary::Ptr updateV2 = params->Get("update_v2");
